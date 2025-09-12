@@ -33,7 +33,7 @@ async function getAccessToken() {
 // Команда /start
 bot.onText(/\/start/, (msg) => {
   const chatId = msg.chat.id;
-  bot.sendMessage(chatId, "Привет! Напиши /newcontact чтобы создать новый Contact__c в Salesforce.");
+  bot.sendMessage(chatId, "Привет, Анютка! Нажми /newcontact чтобы создать новый Контакт в Salesforce.");
 });
 
 // Команда /newcontact
