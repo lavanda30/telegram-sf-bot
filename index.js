@@ -12,6 +12,16 @@ if (!process.env.TG_TOKEN || !process.env.SF_CLIENT_ID || !process.env.SF_CLIENT
 
 const bot = new TelegramBot(process.env.TG_TOKEN, { polling: true });
 
+app.get('/auth', (req, res) => {
+  const params = new URLSearchParams({
+    response_type: 'code',
+    client_id: process.env.SF_CLIENT_ID,
+    redirect_uri: process.env.SF_REDIRECT_URI
+  });
+  res.redirect(`https://login.salesforce.com/services/oauth2/authorize?${params.toString()}`);
+});
+
+
 // Получение нового access_token через refresh_token
 async function getAccessToken() {
   try {
