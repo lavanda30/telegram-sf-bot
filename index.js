@@ -18,6 +18,7 @@ async function getAccessToken() {
   try {
     const response = await axios.post('https://login.salesforce.com/services/oauth2/token', null, {
       params: {
+        console.log('!!!!!!!SF_CLIENT_ID!!!!!!! ', process.env.SF_CLIENT_ID);
         grant_type: 'refresh_token',
         client_id: process.env.SF_CLIENT_ID,
         client_secret: process.env.SF_CLIENT_SECRET,
