@@ -30,7 +30,7 @@ app.post('/telegram-webhook', async (req, res) => {
 
       await axios.post(
         `${process.env.SF_INSTANCE_URL}/services/data/v57.0/sobjects/Contact__c/`,
-        { Name: "Имя от пользователя", Phone__c: "Телефон" },
+        { Name: "Имя от пользователя", ClientName__c: "Телефон" },
         { headers: { Authorization: `Bearer ${accessToken}` } }
       );
 
