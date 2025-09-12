@@ -1,30 +1,24 @@
 import express from 'express';
 import axios from 'axios';
-import TelegramBot from 'node-telegram-bot-api';
 import dotenv from 'dotenv';
+import TelegramBot from 'node-telegram-bot-api';
 
 dotenv.config();
 
 const app = express();
+const PORT = process.env.PORT || 8080;
+
+// Парсинг JSON для POST-запросов
 app.use(express.json());
 
-// Используем порт, который задаёт Railway
-const PORT = process.env.PORT || 3000;
-
-// Создаём объект бота без polling — будем использовать webhook
+// Инициализация бота без polling — только через webhook
 const bot = new TelegramBot(process.env.TG_TOKEN);
-const BASE_URL = process.env.BASE_URL; // https://your-project-name.up.railway.app
+const BASE_URL = process.env.BASE_URL; // https://telegram-sf-bot.up.railway.app
 
-// Устанавливаем webhook при старте
+// Устанавливаем webhook
 bot.setWebHook(`${BASE_URL}/bot${process.env.TG_TOKEN}`);
 
-// Endpoint для webhook Telegram
-app.post(`/bot${process.env.TG_TOKEN}`, (req, res) => {
-  bot.processUpdate(req.body);
-  res.sendStatus(200);
-});
-
-// Функция для получения access_token через refresh_token
+// Функция для получения access_token по refresh_token
 async function getAccessToken() {
   const response = await axios.post('https://login.salesforce.com/services/oauth2/token', null, {
     params: {
@@ -37,10 +31,16 @@ async function getAccessToken() {
   return response.data.access_token;
 }
 
+// Эндпоинт для Telegram webhook
+app.post(`/bot${process.env.TG_TOKEN}`, (req, res) => {
+  bot.processUpdate(req.body);
+  res.sendStatus(200);
+});
+
 // Обработчик команды /start
 bot.onText(/\/start/, (msg) => {
   const chatId = msg.chat.id;
-  bot.sendMessage(chatId, "Привет! Нажми /newcontact для создания нового Contact__c.");
+  bot.sendMessage(chatId, "Привет! Нажми /newcontact для создания Контакта.");
 });
 
 // Обработчик команды /newcontact
@@ -63,7 +63,7 @@ bot.onText(/\/newcontact/, (msg) => {
           `${process.env.SF_INSTANCE_URL}/services/data/v57.0/sobjects/Contact__c/`,
           {
             Name: name,
-            Phone__c: phone
+            ClientName__c: phone
           },
           {
             headers: { Authorization: `Bearer ${accessToken}` }
@@ -79,11 +79,10 @@ bot.onText(/\/newcontact/, (msg) => {
   });
 });
 
-// Проверка работы сервера
-app.get('/', (req, res) => res.send('Bot server is running'));
-
-// Старт сервера
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  console.log(`Webhook URL: ${BASE_URL}/bot${process.env.TG_TOKEN}`);
+// Проверка сервера
+app.get('/', (req, res) => {
+  res.send('Telegram-SF bot is running.');
 });
+
+// Запуск сервера
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
